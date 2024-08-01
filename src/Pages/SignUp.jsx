@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
+import axios from 'axios';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import '../Styles/Signup.css'; // Custom CSS for additional styling
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 function SignUp() {
     const [formData, setFormData] = useState({
@@ -17,10 +20,45 @@ function SignUp() {
         });
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        // Handle form submission logic
-        console.log(formData);
+
+        if (formData.password !== formData.confirmPassword) {
+            toast.error('Passwords do not match!');
+            return;
+        }
+
+        if (formData.password.length < 6) {
+            toast.error('Password must be at least 6 characters long!');
+            return;
+        }
+
+        try {
+            const response = await axios.post('http://localhost:8080/api/auth/signup', {
+                email: formData.email,
+                password: formData.password
+            });
+
+            // Handle successful signup
+            console.log('Signup successful:', response.data);
+            toast.success('Signup successful!');
+
+            // Clear input fields
+            setFormData({
+                email: '',
+                password: '',
+                confirmPassword: '',
+            });
+
+            // Optionally redirect or navigate to another page
+            // For example, if using react-router:
+            // history.push('/signin');
+
+        } catch (error) {
+            // Handle error
+            console.error('There was an error signing up!', error.response?.data || error.message);
+            toast.error('Signup failed. Please try again.');
+        }
     };
 
     return (
@@ -72,22 +110,10 @@ function SignUp() {
                     </button>
                 </form>
                 <div className="text-center mb-3">
-                    <span className="text-muted">Haven't an account? <a href="/SignIn">Sign In</a></span>
+                    <span className="text-muted">Already have an account? <a href="/SignIn">Sign In</a></span>
                 </div>
-                <div className="text-center mb-3">
-                    <hr />
-                    <span className="or-text">or</span>
-                    <hr />
-                </div>
-                <button className="btn btn-outline-primary w-100 mb-2">
-                    <img src="/google.svg" alt="Google Logo" className="me-2" style={{ height: '20px' }} />
-                    Login with Google
-                </button>
-                <button className="btn btn-outline-secondary w-100">
-                    <img src="/microsoft.svg" alt="Microsoft Logo" className="me-2" style={{ height: '20px' }} />
-                    Login with Microsoft
-                </button>
             </div>
+            <ToastContainer />
         </div>
     );
 }
