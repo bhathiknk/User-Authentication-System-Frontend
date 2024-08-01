@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
+import axios from 'axios';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import '../Styles/Signup.css'; // Custom CSS for additional styling
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 function SignIn() {
     const [formData, setFormData] = useState({
         email: '',
         password: '',
-        confirmPassword: '',
     });
 
     const handleChange = (e) => {
@@ -17,10 +19,33 @@ function SignIn() {
         });
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        // Handle form submission logic
-        console.log(formData);
+
+        try {
+            const response = await axios.post('http://localhost:8080/api/auth/signin', {
+                email: formData.email,
+                password: formData.password
+            });
+
+            // Handle successful sign-in
+            console.log('Sign In successful:', response.data);
+            toast.success('Sign In successful!');
+            // Clear input fields
+            setFormData({
+                email: '',
+                password: '',
+                confirmPassword: '',
+            });
+            // Redirect or perform actions upon successful sign-in
+            // For example, if using react-router:
+            // history.push('/dashboard');
+
+        } catch (error) {
+            // Handle error
+            console.error('There was an error signing in!', error.response?.data || error.message);
+            toast.error('Sign In failed. Please check your credentials and try again.');
+        }
     };
 
     return (
@@ -52,7 +77,7 @@ function SignIn() {
                     </div>
                     <div className="text-center mb-3">
                         <small className="text-muted">
-                            By creating an account, you agree to the{' '}
+                            By signing in, you agree to the{' '}
                             <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>.
                         </small>
                     </div>
@@ -61,22 +86,10 @@ function SignIn() {
                     </button>
                 </form>
                 <div className="text-center mb-3">
-                    <span className="text-muted">Haven't an account? <a href="/">Sign Up</a></span>
+                    <span className="text-muted">Don't have an account? <a href="/">Sign Up</a></span>
                 </div>
-                <div className="text-center mb-3">
-                    <hr />
-                    <span className="or-text">or</span>
-                    <hr />
-                </div>
-                <button className="btn btn-outline-primary w-100 mb-2">
-                    <img src="/google.svg" alt="Google Logo" className="me-2" style={{ height: '20px' }} />
-                    Login with Google
-                </button>
-                <button className="btn btn-outline-secondary w-100">
-                    <img src="/microsoft.svg" alt="Microsoft Logo" className="me-2" style={{ height: '20px' }} />
-                    Login with Microsoft
-                </button>
             </div>
+            <ToastContainer />
         </div>
     );
 }
